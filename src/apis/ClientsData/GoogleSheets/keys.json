@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "golubin-bot",
+  "private_key_id": "d56cd8f8abd47fa31b02618e1c68e2753740b958",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCcLpsWAUF4Oz1u\nvwcY0bb3K/Yft9CXrjT2PYmeXadl1HZLqYbGdFl1Y/yLU9Ogd/MVzejenW1++pOt\nwNUadRDRLc/svsVstNVw72e4TWaShbaElDTpCB2mxGPOQzgR7wN7MsxZB5wm3vdQ\nbK8BVEhMGX68yBJoWhxHZJBm++Y/1KBdy3vPw/Nks2DYm+j6gcl7JebLC0k85gey\nI0uo4lXPrU9bCU4co0R5ZA5wooasnAsuaer1O6G6kufTq9RpcpiPt1eSVRkxdSit\nLysu7M3q3nI4qaZFAuSXSSrIWv4g7RfNThHBsoJ4cOXne+IYs4LrQLJO/DUp6rDN\nu8pPoEATAgMBAAECggEAFhv85V0RJRGRzUMqoIdTlOL6yRuu4kINikxE1o/geihd\nBLH/e8mNvnIElr6rpzxDw7LuA9GaZg7X6BFzuXaYBlyrYhLRhOWGj6G8d5kxa42V\nPGh0owZ8mBaWIGVgox1IS2DyD6plnxUSQqbYEWKah3dWeygBfxc+iJbCYGnJewCI\nfEpLtlkDcelTQMj2M61RgGfYh3OfYaWhHMkpQ6UvhjqCYxsT60W1MsyxWwpfMrzb\naoHc8ud1GnGeYiQIiNOenPar7PMQupSh2Tkws08IdxrpKGYcA6gxGr+1+CSCrUO2\ne+4c61xai6VNwpGlEk0IH5B9WngTYOzxwZ0wnBohjQKBgQDOsLmwhLobm2WXiMWG\n5+yE87etjML2pnoOAWJOccgiOqG0hdbRC9B3bsIKgyLJ+bzQfRUp2dbMkwJAXRCZ\nIzqFSzyYKwLp1n23Zw9zPgt/JLfw3yHTZ8jiTxsmjAerGghbbk5wfVdFoZkk/hlQ\nDppf/ZPSAjoztQHct+cpxKS4zwKBgQDBcSt0xPDgWzKhM5NbxwRwAqsAGjor8vTt\n4fkupAsd7G73YPI45lbri808ix8R6yzfn6ZO/HNABwapwp2H4MtbpLDOgf2T9S1u\nb43/pJ5fLLSiAxYLMHF+FRvoupSryb/A5Hron/k6ReXGEz9Jwmg1RomZl58QAyVS\njyI6YhiNfQKBgQDFzL6HvR1V2ispD4zpA/6HZa17+t+Bp+Paj1yC8cSzbSTfW84u\nlH3WLjqoUML0Q3l8lJeyS3SSpoVbDzUZOGuCsHO2tEK/gbMh1xEkGlZqQLt/WipG\n5GWMnmO/Sfb0uZ8R0MhkQq9IRdQHYNzcjn0SK9xQ+Cy22xyDG8OvZy60ZQKBgFg4\nxcnme7jGvut3+y+zL1nqTZSpYXhjwMKw+ZUE6bEHAIC/7Rh4LJIWW07OYCgq6nc+\nd3m0dtdvnOFVScULh5NPI/e6nyyYd9TS+Z7qs/PSDruIzsfhmxEWjXjxhxZl15cg\nXNG1C9RAxo80ffuktyP8/IpY9Qk3dhEWCFU6Idp9AoGBAJBgSirU5SzbeoM3IliC\nJNxAfplyXZgMQRNrH3UAz/kQqAf0opDnXJ3VILDiI6YgAkJvaBxaEdc03Gwk2xLK\n1yJ3lK7bvQ9X9eZ3iyHwC3Jzc1h5V0fTXtwh00Qv6VuTTvC3uaQ7/nQ+/tEC2NTC\nS8hbJEsTmap8SN+5Tb712ldz\n-----END PRIVATE KEY-----\n",
+  "client_email": "golubin-bot@golubin-bot.iam.gserviceaccount.com",
+  "client_id": "110346644139784813944",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/golubin-bot%40golubin-bot.iam.gserviceaccount.com"
+}

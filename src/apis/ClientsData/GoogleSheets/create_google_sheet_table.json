@@ -1,0 +1,385 @@
+{
+	"create":
+	{
+		"requests": [{
+			"addSheet": {
+				"properties": {
+					"title": "Статистика Golubin Bot",
+					"tabColor":	{
+						"red": 0.098,
+						"green": 0.84,
+						"blue": 0.84,
+						"alpha": 1.0
+					},
+					"tabColorStyle": 
+					{
+						"rgbColor": {
+							"red": 0.098,
+       						"green": 0.84,
+       						"blue": 0.84
+						}
+					}
+				}
+			}
+		}]
+	},
+	"set-columns": {
+		"valueInputOption": "USER_ENTERED",
+		"data": [
+			{
+				"range": "Статистика Golubin Bot!A1:C55",
+				"majorDimension": "ROWS",
+				"values": [
+					["№", "Направление", "Сообщения/Дата"],
+					["1", "Таргет",      "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+					
+					["2", "Контекст",    "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+					
+
+					["3", "SMM",      	 "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",		  	 "Не целевых"],
+					["" , "",		  	 "Всего"],
+					["" , "",		  	 "% целевых"],
+					
+					["4", "Сайты",       "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["5", "Чат боты",    "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["6", "SEO",         "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["7", "Дизайн",      "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["8", "Копирайтинг", "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["9", "Продюсер",    "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["10", "Маркетинг",  "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"],
+
+					["11", "Авитолог",   "Сообщения/Дата"],
+					["", "",    		 "Целевых"],
+					["" , "",			 "Не целевых"],
+					["" , "",			 "Всего"],
+					["" , "",			 "% целевых"]
+				]
+			}
+		]
+	},
+	"set-formatting": {
+		"requests": [
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 1,
+						"endRowIndex": 5,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 5,
+						"endRowIndex": 10,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 10,
+						"endRowIndex": 15,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 15,
+						"endRowIndex": 20,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 20,
+						"endRowIndex": 25,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 25,
+						"endRowIndex": 30,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 30,
+						"endRowIndex": 35,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 35,
+						"endRowIndex": 40,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 40,
+						"endRowIndex": 45,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 45,
+						"endRowIndex": 50,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"mergeCells": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 50,
+						"endRowIndex": 55,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"mergeType": "MERGE_COLUMNS"
+				}
+			},
+			{
+				"updateBorders": {
+					"range": {
+						"sheetId": -1,
+						"startRowIndex": 0,
+						"endRowIndex": 55,
+						"startColumnIndex": 0,
+						"endColumnIndex": 3
+					},
+					"top": {
+						"style": "SOLID",
+						"width": 1,
+						"color": {"red": 0.0, "blue": 0.0, "green": 0.0}
+					},
+					"bottom": {
+						"style": "SOLID",
+						"width": 1,
+						"color": {"red": 0.0, "blue": 0.0, "green": 0.0}
+					},
+					"left": {
+						"style": "SOLID",
+						"width": 1,
+						"color": {"red": 0.0, "blue": 0.0, "green": 0.0}
+					},
+					"right": {
+						"style": "SOLID",
+						"width": 1,
+						"color": {"red": 0.0, "blue": 0.0, "green": 0.0}
+					},
+					"innerHorizontal": {
+						"style": "SOLID",
+						"width": 1,
+						"color": {"red": 0.0, "blue": 0.0, "green": 0.0}
+					},
+					"innerVertical": {
+						"style": "SOLID",
+						"width": 1,
+						"color": {"red": 0.0, "blue": 0.0, "green": 0.0}
+					}
+				}
+			},
+			{
+				"repeatCell": 
+				{
+					"range": 
+					{
+						"sheetId": -1,
+						"startRowIndex": 0,
+						"endRowIndex": 1,
+						"startColumnIndex": 0,
+						"endColumnIndex": 2
+					},
+					"cell": 
+					{
+						"userEnteredFormat": 
+						{
+							"textFormat":
+							{
+								"bold": true
+							}
+						}
+					},
+					"fields": "userEnteredFormat.textFormat" 
+				}
+			},
+			{
+				"repeatCell": 
+				{
+					"range": 
+					{
+						"sheetId": -1,
+						"startRowIndex": 0,
+						"endRowIndex": 100,
+						"startColumnIndex": 0,
+						"endColumnIndex": 1000
+					},
+					"cell": {
+						"userEnteredFormat": {
+							"horizontalAlignment": "CENTER",
+							"verticalAlignment": "MIDDLE"
+						}
+					},
+					"fields": "userEnteredFormat(horizontalAlignment, verticalAlignment)" 
+				}
+			},
+			{
+				"repeatCell": 
+				{
+					"range": 
+					{
+						"sheetId": -1,
+						"startRowIndex": 0,
+						"endRowIndex": 100,
+						"startColumnIndex": 0,
+						"endColumnIndex": 1000
+					},
+					"cell": {
+						"userEnteredFormat": {
+							"numberFormat": {
+								"type": "TEXT"
+							}
+						}
+					},
+					"fields": "userEnteredFormat.numberFormat" 
+				}
+			},
+			{
+				"updateDimensionProperties": {
+					"range": {
+						"sheetId": -1,
+						"dimension": "COLUMNS", 
+						"startIndex": 0,        
+						"endIndex": 1
+					},
+					"properties": {
+						"pixelSize": 22
+					},
+					"fields": "pixelSize"
+				}
+			},{
+				"updateDimensionProperties": {
+					"range": {
+						"sheetId": -1,
+						"dimension": "COLUMNS", 
+						"startIndex": 1,        
+						"endIndex": 2
+					},
+					"properties": {
+						"pixelSize": 95
+					},
+					"fields": "pixelSize"
+				}
+			},{
+				"updateDimensionProperties": {
+					"range": {
+						"sheetId": -1,
+						"dimension": "COLUMNS", 
+						"startIndex": 2,        
+						"endIndex": 3
+					},
+					"properties": {
+						"pixelSize": 113
+					},
+					"fields": "pixelSize"
+				}
+			}
+		]
+	}
+}
