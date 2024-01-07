@@ -112,8 +112,7 @@ async def del_sended_message_by_callback_query(call: CallbackQuery, bot: Bot, bo
         await bot.edit_message_text('Сообщение удаляется, ждите...', call.from_user.id, call.message.message_id)
     except:
         await bot.send_message(call.from_user.id, 'Сообщение удаляется, ждите...')
-    await delete_message_and_ge
-    t_info_about_it_to_admin(bot, bot_id, sended_msg_data, relative_message_index, call)
+    await delete_message_and_get_info_about_it_to_admin(bot, bot_id, sended_msg_data, relative_message_index, call)
     delete_sended_message_from_temp(bot_id, relative_message_index)
 
 async def delete_message_and_get_info_about_it_to_admin(
