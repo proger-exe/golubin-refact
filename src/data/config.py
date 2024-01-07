@@ -287,10 +287,10 @@ TELEGRAM_CLIENT_IDS = {
     MARKETPLACES_MODE: None
 }
 #messages directories
-NEW_MESSAGES_PATH = './new messages/' if not TESTING else './temp new messages/'
+NEW_MESSAGES_PATH = 'msgs/new messages/' if not TESTING else 'msgs/temp new messages/'
 TEMP_MESSAGES_PATH = './temp new messages/'
-SENDED_DIR = 'sended/'
-FORWARD_INFO = 'to forward.txt' 
+SENDED_DIR = 'msgs/sended/'
+FORWARD_INFO = 'msgs/to forward.txt' 
 TEXT_INFO = 'text.txt'
 MESSAGE_DIR_TIME_FORMAT = '%m_%d_%H_%M_%S_%f'
 

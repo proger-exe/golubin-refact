@@ -2,23 +2,16 @@ from asyncio.log import logger
 import logging
 from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import *
 from yoomoney import Account
-
-
-raise Exception("File need to rewrite")
 import Votes
 from ...apis.ClientsData.GoogleSheets.daily_clients_gsh_uploading import connect_to_gsh_and_get_sheet_id
 from bot_config import CALLBACK_SEP
 from ...apis.ClientsData.GoogleSheets.config import DEL_GOOGLE_SHEET, GOOGLE_SHEETS_BUTTON
 from ..Accounts import get_admin_of_account
 from Votes import check_if_client_is_allowed_to_get_vote_buttons
-from bot_get_nick import get_nick
+from src.apis.bot_get_nick import get_nick
 from ...apis.ClientsData.GoogleSheets.clients_google_sheets import *
-
-class States(StatesGroup):
-    get_spread_sheet_id = State()
 
 def set_google_sheet_add_handlers(dp: Dispatcher):
     bot = dp.bot
@@ -82,7 +75,7 @@ def set_google_sheet_add_handlers(dp: Dispatcher):
             disable_web_page_preview = True
         )
         await bot.send_media_group(callback.from_user.id, screenshots)
-        await States.get_spread_sheet_id.set()
+        await state.set_state("get_spread_sheet_id")
 
     @dp.message_handler(state = States.get_spread_sheet_id)
     async def get_spread_sheet_id(message: Message, state: FSMContext):

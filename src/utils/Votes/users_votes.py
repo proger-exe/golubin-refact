@@ -4,7 +4,7 @@ from datetime import date
 import typing
 from mysql.connector.cursor import MySQLCursor
 from .config import *
-from database import *
+from src.apis.db import *
 
 class Vote:
 

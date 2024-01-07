@@ -1,14 +1,29 @@
 from datetime import datetime
 from typing import List, Tuple, Union
+from src.data.bot_data import EUGENIY_ID, MIN_PERIOD_TO_GET_VOTE_BUTTONS, days_per_period
 from src.data.config import *
 from src.apis import get_connection_and_cursor, close_connection_and_cursor, commit_and_close_connection_and_cursor
+from src.utils.client import Client
 from telebot import TeleBot
 
+
+def client_has_year_subscribe(client_id: int, category: int = None) -> bool:
+    if client_id == EUGENIY_ID:
+        return True
+    if not client_id:
+        return False
+    subscribes = Client.get_clients_by_filter(
+            id = client_id, payment_period_end = datetime.now(), greater = True, category = category, 
+            payment_period = days_per_period[MIN_PERIOD_TO_GET_VOTE_BUTTONS], is_paid = True
+        )
+    if not subscribes:
+        return False
+    return True
 
 
 def user_is_having_launched_bot(user_id: int) -> bool:
     conn, cursor = get_connection_and_cursor()
-    cursor.execute(F'SELECT COUNT({ID_COL}) FROM {USERS_TABLE_NAME} WHERE {ID_COL} = {user_id}')
+    cursor.execute(f'SELECT COUNT({ID_COL}) FROM {USERS_TABLE_NAME} WHERE {ID_COL} = {user_id}')
     result = cursor.fetchall()
     close_connection_and_cursor(conn, cursor)
     return result[0][0]

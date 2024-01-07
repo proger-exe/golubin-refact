@@ -7,7 +7,7 @@ from src.apis.ClientsData import Accounts
 from typing import List, Tuple
 from Votes import Vote
 from Votes.config import *
-from Votes.bot_votes_keyboards import check_if_client_is_allowed_to_get_vote_buttons
+from src.handlers.need_rewrite.bot_votes_keyboards import check_if_client_is_allowed_to_get_vote_buttons
 from .config import *
 from .clients_google_sheets import *
 from oauth2client.service_account import ServiceAccountCredentials

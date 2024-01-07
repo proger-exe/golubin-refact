@@ -2,7 +2,7 @@ from shutil import rmtree
 from typing import Tuple, Union
 import logging
 import aiogram
-from src.data.bot_data import CALLBACK_SEP, USERS_THAT_ALLOWED_TO_DELETE_MESSAGES
+from src.data.bot_data import CALLBACK_SEP, USERS_THAT_ALLOWED_TO_DELETE_MESSAGES, bot_tokens
 from src.apis import *
 from src.data.config import *
 from aiogram import Bot, Dispatcher
@@ -112,7 +112,8 @@ async def del_sended_message_by_callback_query(call: CallbackQuery, bot: Bot, bo
         await bot.edit_message_text('Сообщение удаляется, ждите...', call.from_user.id, call.message.message_id)
     except:
         await bot.send_message(call.from_user.id, 'Сообщение удаляется, ждите...')
-    await delete_message_and_get_info_about_it_to_admin(bot, bot_id, sended_msg_data, relative_message_index, call)
+    await delete_message_and_ge
+    t_info_about_it_to_admin(bot, bot_id, sended_msg_data, relative_message_index, call)
     delete_sended_message_from_temp(bot_id, relative_message_index)
 
 async def delete_message_and_get_info_about_it_to_admin(
@@ -177,15 +178,15 @@ def delete_sended_message_from_temp(bot_id: int, relative_message_index: int):
                 f'Failed to delete message`s directory for ({relative_message_index}): '+str(e), exc_info = True)
 
 def get_relative_message_id(bot_id: int, sent_msg_id: int, user_id: int) -> Union[int, None]:
-     conn, cursor = get_connection_and_cursor()
-     cursor.execute(f'SELECT {RELATIVE_MSG_ID} FROM {SENDED_MESSAGES} WHERE {RECIEVER_ID} = {user_id} AND '
-         f'{SENDED_MSG_ID} = {sent_msg_id} AND {BOT_ID} = {bot_id}')
-     result = cursor.fetchall()
-     close_connection_and_cursor(conn, cursor)
-     if not result:
-         return None
-     else:
-         return result[0][0]
+    conn, cursor = get_connection_and_cursor()
+    cursor.execute(f'SELECT {RELATIVE_MSG_ID} FROM {SENDED_MESSAGES} WHERE {RECIEVER_ID} = {user_id} AND '
+        f'{SENDED_MSG_ID} = {sent_msg_id} AND {BOT_ID} = {bot_id}')
+    result = cursor.fetchall()
+    close_connection_and_cursor(conn, cursor)
+    if not result:
+        return None
+    else:
+        return result[0][0]
 
 async def delete_message_from_inside_bot(inside_bot_message_id: int, category: int, bot: aiogram.Bot):
     bot_id = SENDER_BOT_ID + category
@@ -205,3 +206,19 @@ def init_callbacks(dp: Dispatcher, bot_id: int): # bot_id can be either PAYING_B
     @dp.callback_query_handler(lambda c: c.data.startswith(DELETE_MESSAGE))
     async def message_deleting_query_handler(call: CallbackQuery):
         await del_sended_message_by_callback_query(call, bot, bot_id)
+        
+
+async def del_spam_message(relative_msg_id: int, category: int, not_delete: typing.Tuple[int, int])\
+-> typing.Tuple[int, int, int]:
+    b = Bot(bot_tokens[category])
+    try:
+        data = get_sended_message_data(relative_msg_id, SENDER_BOT_ID + category)
+        succesfully, unsuccesfully, total = await delete_sended_msg(b, data, not_delete)
+        await (await b.get_session()).close()
+        del data
+    except:
+        logging.critical(f'Failed to delete spam message by relative message id:', exc_info = True)
+        return (0, 0, 0)
+
+    delete_saved_message_data(relative_msg_id, SENDER_BOT_ID + category)
+    return succesfully, unsuccesfully, total
