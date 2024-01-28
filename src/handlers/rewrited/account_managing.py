@@ -1,12 +1,10 @@
-from datetime import datetime
-from random import randint
 from typing import Optional
-import typing
+
+from aiogram.types import Message, CallbackQuery
 from aiogram.dispatcher import FSMContext
+
 from src.apis.db.user import client_has_year_subscribe
 from src.keyboards.user import manage_account_keyboard
-from src.utils.client import Client
-from aiogram.types import Message, CallbackQuery
 from src.apis.db.accounts import *
 from src.data.bot_data import *
 from src.apis.bot_get_nick import get_nick

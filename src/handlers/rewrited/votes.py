@@ -8,7 +8,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram_calendar import SimpleCalendar, simple_cal_callback
 from src.apis.ClientsData.StopWords import edit_bot_filter
 from src.data import bot_data, config
-from src.utils.Votes import JUST_DEL_MSG, THROW_MSG_TO_SPAM, generate_statistics_texts_for_message
+from db import JUST_DEL_MSG, THROW_MSG_TO_SPAM, generate_statistics_texts_for_message
 from src.utils.client import Client 
 from src.data.bot_data import MESSAGE_FILTER, MIN_PERIOD_TO_GET_VOTE_BUTTONS, days_per_period
 from src.utils.errors import MessageInvalid

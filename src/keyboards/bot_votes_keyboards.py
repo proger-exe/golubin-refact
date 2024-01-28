@@ -10,9 +10,9 @@ from src.data.config import *
 from src.apis.db.accounts import get_all_accounts_of, get_admin_of_account
 from src.apis.ClientsData import StopWords
 from src.utils import message_deleting
-from src.utils.Votes import check_if_client_is_allowed_to_get_vote_buttons
+from db import check_if_client_is_allowed_to_get_vote_buttons
 from src.utils.Votes.config import CONFIRM_SPAM, DISCARD_SPAM, JUST_DEL_MSG, NOT_TARGET, SPAM, SPAM_ONLY_FOR_CLIENT, TARGET, THROW_MSG_TO_SPAM, vote_type_names
-from src.utils.Votes.users_votes import Vote
+from db.users_votes import Vote
 
 # ...
 

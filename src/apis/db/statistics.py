@@ -1,10 +1,10 @@
 from typing import Iterable, List, Tuple, Union
-from .config import *
+from src.utils.Statistics.config import *
 from mysql.connector.connection import MySQLConnection as Connection
 from mysql.connector.cursor import MySQLCursor as Cursor
 from datetime import datetime
 from decimal import Decimal
-from database import *
+from db import *
 
 def save_to_statistics(
 	new_clients: int = 0, # a client is a person who paid at least one subscribe
