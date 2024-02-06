@@ -1,15 +1,10 @@
-from asyncio.log import logger
 import logging
-from aiogram import Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import *
 from src.keyboards.user import google_sheets_panel
-from yoomoney import Account
-from src.apis.db.users_votes import Votes
 from src.apis.ClientsData.GoogleSheets.daily_clients_gsh_uploading import connect_to_gsh_and_get_sheet_id
-from src.data.bot_data import call_SEP
 from src.apis.db.accounts import get_admin_of_account
-from Votes import check_if_client_is_allowed_to_get_vote_buttons
+from src.apis.db.votes import check_if_client_is_allowed_to_get_vote_buttons
 from src.apis.bot_get_nick import get_nick
 from src.apis.ClientsData.GoogleSheets.clients_google_sheets import *
 
@@ -52,12 +47,12 @@ async def pludge_google_sheet(call: CallbackQuery, state: FSMContext):
     if spread_sheet_id:
         await call.answer(f'У вас уже подключена таблица')
         return
-    if not Votes.check_if_client_is_allowed_to_get_vote_buttons(call.from_user.id):
+    if not check_if_client_is_allowed_to_get_vote_buttons(call.from_user.id):
         await call.answer('У вас не оплачена годовая подписка')
         return
     screenshots = MediaGroup()
     for photo in photos_which_describes_how_to_pludge_google_sheets:
-        screenshots.attach_photo(photo)
+        screenshots.attach_photo(photo)  # type: ignore
     await call.message.edit_text(
         'Для того чтобы подключить гугл таблицу к боту, следуйте следующим инструкциям:\n\n'
             '\t1)Перейдите на https://docs.google.com/spreadsheets/u/0/?tgif=d, для '

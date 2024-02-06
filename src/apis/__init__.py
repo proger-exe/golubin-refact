@@ -1,1 +1,1 @@
-from .db import *
+from .db.votes import *

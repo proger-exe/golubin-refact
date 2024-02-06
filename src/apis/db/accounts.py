@@ -1,5 +1,5 @@
 from typing import List, Union
-from src.apis import get_connection_and_cursor, close_connection_and_cursor, commit_and_close_connection_and_cursor
+from src.apis.db import get_connection_and_cursor, close_connection_and_cursor, commit_and_close_connection_and_cursor
 
 _ACCOUNTS_TABLE = 'accounts'
 _OWNER_ID = 'owner_id'

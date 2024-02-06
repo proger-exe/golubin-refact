@@ -9,10 +9,10 @@ from src.data.bot_data import CALLBACK_SEP, DEVELOPER_ID, EUGENIY_ID, PAYING_BOT
 from src.data.config import *
 from src.apis.db.accounts import get_all_accounts_of, get_admin_of_account
 from src.apis.ClientsData import StopWords
-from src.utils import message_deleting
-from db import check_if_client_is_allowed_to_get_vote_buttons
-from src.utils.Votes.config import CONFIRM_SPAM, DISCARD_SPAM, JUST_DEL_MSG, NOT_TARGET, SPAM, SPAM_ONLY_FOR_CLIENT, TARGET, THROW_MSG_TO_SPAM, vote_type_names
-from db.users_votes import Vote
+from src.utils import message_deleting, client
+from src.apis.db.votes import check_if_client_is_allowed_to_get_vote_buttons
+from src.utils.Votes.config import CONFIRM_SPAM, DISCARD_SPAM, JUST_DEL_MSG, MESSAGE_VOTE, NOT_TARGET, SPAM, SPAM_ONLY_FOR_CLIENT, TARGET, THROW_MSG_TO_SPAM, vote_type_names
+from src.apis.db.users_votes import Vote
 
 # ...
 
@@ -230,12 +230,12 @@ async def message_vote_callback(bot: Bot, callback: CallbackQuery, category: int
                     if entity.type in ('mention', 'url', 'email', 'phone_number', 'text_mention'):
                         nick = entity.get_text(callback.message.text)
                         break
-                client = Client(callback.from_user.id, None, None, category)
+                client = client.Client(callback.from_user.id, None, None, category)
                 if nick and not nick in StopWords.get_stop_words(client):
                     StopWords.add_stop_words(client, [nick.lower()])
                     await callback.answer(f'Пользователь {nick} заблокирован для вас')
                 else:
-                    callback.answer('Не удалось определить пользователя, чтобы его заблокировать')
+                    await callback.answer('Не удалось определить пользователя, чтобы его заблокировать')
             try:
                 await callback.message.delete()
                 if message_id != 0:
