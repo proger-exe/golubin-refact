@@ -1,10 +1,10 @@
 from datetime import date
 from decimal import Decimal
 
-TESTING = True  # if it is turned on bot will work via test token, use test mysql database and test data
+TESTING = False  # if it is turned on bot will work via test token, use test mysql database and test data
 
 # mysql
-# database and table names
+#   database and table names
 CLIENTS_DATABASE_NAME = 'service_bot' if not TESTING else 'service_bot_test'
 TRIAL_PERIOD_INFO_TABLE = 'trial_period_info'
 CLIENTS_SUBSCRIBES = 'clients_subscribes' 
@@ -76,8 +76,8 @@ SEO_MODE = 5
 DESIGN_MODE = 6
 CONTEXT_MODE = 7
 PRODUSER_MODE = 8
-MARKETING_MODE = 9
-AVITOLOG_MODE = 10
+MARKETING_MODE = 9  
+AVITOLOG_MODE = 10  
 JURISPRUDENCE_MODE = 11
 PSYCHOLOGY_MODE = 12
 SURGERY_MODE = 13
@@ -126,6 +126,11 @@ HR_MODE = 54
 CLEANNING_MODE = 55
 BUSINESS_SALE_MODE = 56
 REELSMAKER_MODE = 57
+BUILDING_MODE = 58
+ASTROLOGY_MODE = 59
+MAILER_MODE = 60
+APPARTMENT_FIX_MODE = 61
+DREAM_MODE = 62
 
 # datas for categories
 message_categories = (
@@ -134,12 +139,14 @@ message_categories = (
     PSYCHOLOGY_MODE, INTERIOR_MODE, CHAT_BOTS_MODE, COPYRIGHT_MODE,
     ASSISTANT_MODE, MARKETPLACES_MODE, TUTOR_MODE, SALES_MODE, 
     ACCOUNTANT_MODE, CARGO_MODE, FULLFILLMENT_MODE, ANALYTICS_MODE, 
-    BEAUTYDUBAI_MODE, METODOLOGY_MODE, CROPS_MODE, CERTIFICATION_MODE, 
-    ENGINEER_MODE, COUCH_MODE, MANAGER_MODE, PHOTOGRAPHER_MODE, 
+    METODOLOGY_MODE, CROPS_MODE, CERTIFICATION_MODE, 
+    ENGINEER_MODE, MANAGER_MODE, PHOTOGRAPHER_MODE, 
     PROPERTY_MODE, ANIMATOR_MODE, TRANSPORTATION_MODE, GERMAN_MODE,
-    DENT_MODE, REVIEWS_MODE, VIDEOGRAPH_DUBAI_MODE, HRIT_MODE,
+    DENT_MODE, REVIEWS_MODE, HRIT_MODE,
     PR_MODE, VOCALS_MODE, TAILORING_MODE, TRANSLATE_MODE, CUSTOMS_MODE,
     FURNITURE_MODE, MUSIC_MODE, TECH_FIXING_MODE, CLEANNING_MODE,
+    BUSINESS_SALE_MODE, REELSMAKER_MODE, BUILDING_MODE, ASTROLOGY_MODE,
+    APPARTMENT_FIX_MODE, DREAM_MODE
 )
 message_category_names = {
     TARGET_MODE: 'Таргет',
@@ -159,10 +166,10 @@ message_category_names = {
     INTERIOR_MODE: 'Дизайн интерьера',
     TUTOR_ENGLISH_MODE: 'Репетитор английского',
     ASSISTANT_MODE: 'Ассистент',
-    MARKETPLACES_MODE: 'Менеджер маркетплейсов',
+    MARKETPLACES_MODE: 'Менеджер маркетплейсов|Вакансии',
     BOTS_MODE: 'Боты',
     TUTOR_MODE: 'Репетитор',
-    SALES_MODE: 'Продажи',
+    SALES_MODE: 'РОП |Вакансии',
     INVESTMENTS_MODE: 'Инвестиции',
     ACCOUNTANT_MODE: 'Бухгалтерия',
     NUTRITION_MODE: 'Нутрициолог',
@@ -177,30 +184,35 @@ message_category_names = {
     CERTIFICATION_MODE: 'Сертификация',
     ENGINEER_MODE: 'Инженер', 
     COUCH_MODE: 'Коуч',
-    MANAGER_MODE: 'Менеджер',
+    MANAGER_MODE: 'Менеджер маркетплейсов|Резюме',
     PHOTOGRAPHER_MODE: 'Фотограф',
     PROPERTY_MODE: 'Недвижимость',
     SUGARING_DEPILATION_MODE: 'Шугаринг Депиляция РФ',
-    ANIMATOR_MODE: 'Аниматор',
+    ANIMATOR_MODE: 'Event',
     TRANSPORTATION_MODE: 'Перевозки',
     GERMAN_MODE: 'Немецкий',
     DENT_MODE: 'Стоматология',
     REVIEWS_MODE: 'Отзывы',
     VIDEOGRAPH_DUBAI_MODE: 'Видеограф Дубай',
-    HRIT_MODE: 'HRiT',
-    PR_MODE: 'Пиар',
+    HRIT_MODE: 'HR IT',
+    PR_MODE: 'PR',
     VOCALS_MODE: 'Вокал',
-    TAILORING_MODE: 'Пошивка одежды',
+    TAILORING_MODE: 'Пошив одежды',
     TRANSLATE_MODE: 'Переводчик',
     CUSTOMS_MODE: 'Таможня', 
     FURNITURE_MODE: 'Мебель', 
-    MUSIC_MODE: 'Музыка',
+    MUSIC_MODE: 'Музыка репетитор',
     TECH_FIXING_MODE: 'Ремонт техники',
     GEN_WROKERS_MODE: 'Разнорабочие', 
     HR_MODE: 'HR', 
     CLEANNING_MODE: 'Клининг',
     BUSINESS_SALE_MODE: 'Продажа бизнеса',
-    REELSMAKER_MODE: 'Рилсмейкер'
+    REELSMAKER_MODE: 'Рилсмейкер',
+    BUILDING_MODE: 'Строительство',
+    ASTROLOGY_MODE: 'Астролог',
+    MAILER_MODE: 'Рассылщик',
+    APPARTMENT_FIX_MODE: 'Ремонт квартир',
+    DREAM_MODE: 'Сновидение'
 }
 msg_categories = {
     TARGET_MODE: 'target',
@@ -261,7 +273,12 @@ msg_categories = {
     HR_MODE: 'hr', 
     CLEANNING_MODE: 'cleanning',
     BUSINESS_SALE_MODE: 'business_sale',
-    REELSMAKER_MODE: 'reelsmaker'
+    REELSMAKER_MODE: 'reelsmaker',
+    BUILDING_MODE: 'building',
+    ASTROLOGY_MODE: 'astrology',
+    MAILER_MODE: 'mailer',
+    APPARTMENT_FIX_MODE: 'appartment_fix',
+    DREAM_MODE: 'dream'
 }
 
 # ids of clients who send messages to this bot via telethon
@@ -287,10 +304,10 @@ TELEGRAM_CLIENT_IDS = {
     MARKETPLACES_MODE: None
 }
 #messages directories
-NEW_MESSAGES_PATH = 'msgs/new messages/' if not TESTING else 'msgs/temp new messages/'
+NEW_MESSAGES_PATH = './new messages/' if not TESTING else './temp new messages/'
 TEMP_MESSAGES_PATH = './temp new messages/'
-SENDED_DIR = 'msgs/sended/'
-FORWARD_INFO = 'msgs/to forward.txt' 
+SENDED_DIR = 'sended/'
+FORWARD_INFO = 'to forward.txt' 
 TEXT_INFO = 'text.txt'
 MESSAGE_DIR_TIME_FORMAT = '%m_%d_%H_%M_%S_%f'
 

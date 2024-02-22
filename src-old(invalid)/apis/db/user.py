@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List, Tuple, Union
 from src.data.bot_data import EUGENIY_ID, MIN_PERIOD_TO_GET_VOTE_BUTTONS, days_per_period
 from src.data.config import *
-from src.apis import get_connection_and_cursor, close_connection_and_cursor, commit_and_close_connection_and_cursor
+from src.apis.db import get_connection_and_cursor, close_connection_and_cursor, commit_and_close_connection_and_cursor
 from src.utils.client import Client
 from telebot import TeleBot
 

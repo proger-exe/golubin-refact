@@ -5,7 +5,7 @@ import Votes
 from History import *
 from typing import Dict, Tuple, Union
 from aiogram.types import *
-from bot_config import *
+from src.data.bot_data import *
 from client import Client
 from yoomoney import Quickpay
 from yoomoney import Client as ymClient

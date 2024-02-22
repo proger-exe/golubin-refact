@@ -10,6 +10,7 @@ from aiogram.types import Message, CallbackQuery
 from db.promocodes import get_all_promocodes
 from Referal.config import HAS_REFS, NOT_INVITED
 from bot_get_nick import get_nick
+from src.data.bot_data import BACK_BUTTON_TEXT, GET_PROMOCODE_SALE_PERIOD
 from .keyboards import *
 from .admin_bot_config import *
 from .states import BotStates
