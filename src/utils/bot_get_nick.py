@@ -1,7 +1,7 @@
 from aiogram.types import User
 
 
-def get_nick(user: User) -> str:
+async def get_nick(user: User) -> str:
     if user.username:
         return '@' + user.username
     else:

@@ -1,8 +1,11 @@
 from aiogram.types import Message, CallbackQuery
 from bot_keyboards import *
+from src.apis.db import get_connection_and_cursor
 from src.apis.db.modules import promocodes
-from src.apis.db.modules.promocodes import get_promocode_refer
+from src.apis.db.modules.payments_history import Payment, PaymentHistory
+from src.apis.db.modules.promocodes import client_used_promocode, get_id_of_promocode, get_promocode_action, get_promocode_refer, promocode_is_in_db, set_promocode_as_used_by_client
 from shutil import move
+from src.apis.db.modules.statistics import save_to_statistics
 from src.data.bot_config import *
 from src.data.modules.refs import *
 from yoomoney import Client as ymClient
@@ -60,7 +63,7 @@ async def new_order(msg: Message, state: FSMContext):
     else:
         user.set_date_of_trying_to_buy(msg.from_user.id, msg.date)
 
-# @dp.callback_query_handler(# lambda callback: callback.data == NEW_ORDER_BUTTON, state="*")
+# @callback_query_handler(# lambda callback: callback.data == NEW_ORDER_BUTTON, state="*")
 async def new_order_callback(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     kb = get_kb_with_categories()
@@ -69,7 +72,7 @@ async def new_order_callback(callback: CallbackQuery, state: FSMContext):
     except:
         pass
 
-# @dp.callback_query_handler(text_startswith=(CHOOSE_CATEGORY), state="*")
+# @callback_query_handler(text_startswith=(CHOOSE_CATEGORY), state="*")
 async def choose_order_category(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     text = "Использовать промокод?"
@@ -110,7 +113,7 @@ async def choose_order_category(callback: CallbackQuery, state: FSMContext):
     except:
         pass
 
-# @dp.callback_query_handler(text_startswith=(NEW_ORDER_WITHOUT_PROMOCODE), state="*")
+# @callback_query_handler(text_startswith=(NEW_ORDER_WITHOUT_PROMOCODE), state="*")
 async def send_new_order_wo_prmcd(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     category = int(callback.data.split(CALLBACK_SEP)[1])
@@ -152,7 +155,7 @@ def get_referal_link_of_client(client_id: int) -> str:
         return f"{REFERAL_ID}{refer.referal_id}"
     return ""
 
-# @dp.callback_query_handler(lambda s: s.data.startswith(CHOOSE_PERIOD_PREFIX), state="*")
+# @callback_query_handler(lambda s: s.data.startswith(CHOOSE_PERIOD_PREFIX), state="*")
 async def choosing_period_handler(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     admin = Accounts.get_admin_of_account(callback.from_user.id)
@@ -199,7 +202,7 @@ async def choosing_period_handler(callback: CallbackQuery, state: FSMContext):
         except:
             pass
 
-# @dp.callback_query_handler(# lambda callback: callback.data == ACTIVATE_TRIAL_WITHOUT_CATEGORY)
+# @callback_query_handler(# lambda callback: callback.data == ACTIVATE_TRIAL_WITHOUT_CATEGORY)
 async def select_category_to_trial(callback: CallbackQuery):
     await callback.message.answer(
         CHOOSE_CATEGORY_MESSAGE,
@@ -208,7 +211,7 @@ async def select_category_to_trial(callback: CallbackQuery):
         ),
     )
 
-# @dp.callback_query_handler(# lambda callback: callback.data.startswith(ACTIVATE_TRIAL), state="*")
+# @callback_query_handler(# lambda callback: callback.data.startswith(ACTIVATE_TRIAL), state="*")
 async def make_trial(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     admin = Accounts.get_admin_of_account(callback.from_user.id)
@@ -263,7 +266,7 @@ async def make_trial(callback: CallbackQuery, state: FSMContext):
         f"{TEXT_AFTER_FIRST_PAYMENT.format(bot_names[client.sending_mode])}\n\nДля того, "
         f'чтобы пользоваться пробным периодом, необходимо подписаться на {", ".join(get_channel_for_trial_period())}',
     )
-    await send_article_if_it_is_promised(client_id)
+    await send_article_if_it_is_promised(client_id, callback.bot)
     await callback.bot.send_message(client_id, "Главное меню", reply_markup=main_kb)
     user.set_user_as_offered_trial(client_id)
     date_of_recieveing_latest_messages = user.date_of_recieveing_latest_messages(
@@ -305,7 +308,7 @@ def parse_referal_link(referal_link: str) -> str:
             return ""
     return ""
 
-async def send_article_if_it_is_promised(client_id: int, bot: Bot):
+async def send_article_if_it_is_promised(client_id: int, bot):
     # after offering trial client is promised to be recieved the special article
     if user.user_is_offered_trial(client_id):
         await bot.send_message(
@@ -322,7 +325,7 @@ async def send_article_if_it_is_promised(client_id: int, bot: Bot):
             parse_mode="HTML",
         )
 
-# @dp.callback_query_handler(lambda s: s.data.startswith(SELECT_PER_CHOOSE_KB), state="*")
+# @callback_query_handler(lambda s: s.data.startswith(SELECT_PER_CHOOSE_KB), state="*")
 async def back_to_period_choosing(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     args = callback.data.split(CALLBACK_SEP)
@@ -368,7 +371,7 @@ async def back_to_period_choosing(callback: CallbackQuery, state: FSMContext):
     except:
         pass
 
-# @dp.callback_query_handler(lambda s: s.data.startswith(PAY_FOR_PERIOD_PREFFIX + CALLBACK_SEP), state="*")
+# @callback_query_handler(lambda s: s.data.startswith(PAY_FOR_PERIOD_PREFFIX + CALLBACK_SEP), state="*")
 async def pay(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     args = callback.data.split(CALLBACK_SEP)
@@ -656,8 +659,8 @@ def get_kb_to_surcharge_extra_days(
     )
     return kb, surcharge_amount, new_period
 
-# @dp.callback_query_handler(# lambda callback: callback.data.startswith(PAY_USING_REFERAL_BALANCE))
-async def pay_using_referal_balance(callback: CallbackQuery):
+# @callback_query_handler(# lambda callback: callback.data.startswith(PAY_USING_REFERAL_BALANCE))
+async def pay_using_referal_balance(callback: CallbackQuery, state: FSMContext):
     if not RefClient.has_client_id(callback.from_user.id):
         await callback.answer("У вас не открыт реферальный счёт")
         return
@@ -692,8 +695,8 @@ async def pay_using_referal_balance(callback: CallbackQuery):
     )
 
 # @dp.message_handler(
-    state=States.get_sum_to_withdraw_from_referal_balance_for_payment
-)
+#     state=States.get_sum_to_withdraw_from_referal_balance_for_payment
+# )
 async def withdraw_ref_balance(msg: Message, state: FSMContext):
     try:
         sum = Decimal(msg.text.replace(",", "."))
@@ -723,7 +726,8 @@ async def withdraw_ref_balance(msg: Message, state: FSMContext):
     if sum == data["cost"]:
         await state.finish()
         ref_client.balance -= sum
-        ref_client.add_to_db()
+        cur, conn = get_connection_and_cursor()
+        ref_client.add_to_db(conn, cur)
         try:
             await process_payment(
                 data["callback"],
@@ -742,8 +746,9 @@ async def withdraw_ref_balance(msg: Message, state: FSMContext):
                 exc_info=True,
             )
     else:
+        con, cur = get_connection_and_cursor()
         ref_client.balance -= sum
-        ref_client.add_to_db()
+        ref_client.add_to_db(con, cur)
         try:
             is_allowed_to_pay, text, kb = generate_text_and_keboard_for_payment(
                 data["category"],
@@ -775,7 +780,7 @@ async def withdraw_ref_balance(msg: Message, state: FSMContext):
                 pass  # it is not critical, because client will have oportunity just to pay without referal-sale
         if not is_allowed_to_pay:
             ref_client.balance += sum
-            ref_client.add_to_db()
+            ref_client.add_to_db(con, cur)
         else:
             text = (
                 f"{text}\n(<b>{delete_float_point_if_is_not_fraction(sum)}</b> "
@@ -783,7 +788,7 @@ async def withdraw_ref_balance(msg: Message, state: FSMContext):
             )
         await msg.answer(text, reply_markup=kb, parse_mode="HTML")
 
-# @dp.callback_query_handler(text_startswith=(USE_PROMOCODE_BUTTON), state="*")
+# @callback_query_handler(text_startswith=(USE_PROMOCODE_BUTTON), state="*")
 async def get_promocode(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     admin = Accounts.get_admin_of_account(callback.from_user.id)
@@ -828,7 +833,7 @@ async def get_sent_promocode(msg: Message, state: FSMContext):
     await check_given_promocode(promocode, chosen_category, msg.from_user, msg.bot)
 
 async def check_given_promocode(
-    promocode: str, chosen_category: int, from_user: User, bot: Bot
+    promocode: str, chosen_category: int, from_user: User, bot
 ):
     if not promocode_is_in_db(promocode):
         await bot.send_message(
@@ -872,11 +877,11 @@ async def check_given_promocode(
     try:
         if trial_extra_days:
             await process_using_trial_promocode(
-                promocode, category, trial_extra_days, from_user.id
+                promocode, category, trial_extra_days, from_user.id, bot
             )
         elif sale:
             await process_payment_sale_promocode(
-                promocode_id, category, sale, str(period), from_user.id
+                promocode_id, category, sale, str(period), from_user.id, bot
             )
     except:
         logging.critical(
@@ -895,7 +900,7 @@ async def process_using_trial_promocode(
     category: Union[int, None],
     trial_extra_days: int,
     client_id: int,
-    bot: Bot
+    bot
 ):
     client = Client.get_clients_by_filter(id=client_id, category=category)
     now = datetime.now()
@@ -920,7 +925,7 @@ async def process_using_trial_promocode(
             client.id,
             f"Не забудьте активировать бота @{bot_names[client.sending_mode]}",
         )
-    statistics.save_to_statistics(
+    save_to_statistics(
         new_users=1, activated_trial=1, trial_activations=1, ref_link=promocode
     )
     user.set_user_as_offered_trial(client_id)
@@ -939,6 +944,7 @@ async def process_payment_sale_promocode(
     sale: Union[Decimal, float],
     period: str,
     client_id: int,
+    bot
 ):
     sales = {period: sale}
     tariff = (
@@ -967,14 +973,16 @@ def process_referal_for_promocode(promocode: str, user: int):
         return
     if RefClient.has_client_id(user):
         return
+    
+    con, cur = get_connection_and_cursor()
     referal = RefClient(user, HASNT_REFS, Decimal("0"), refer)
-    referal.add_to_db()
+    referal.add_to_db(con, cur)
     refer = RefClient.get_client_by_id(refer)
     refer.referal_status = HAS_REFS
-    refer.add_to_db()
+    refer.add_to_db(con, cur)
 
 # @dp.message_handler(text= SUBSRIBES_BUTTON, state="*")
-async def get_subscribes(msg: Message, state: FSMContext):
+async def get_subscribes_msg(msg: Message, state: FSMContext):
     await state.finish()
     text, keyboard = await generate_message_for_subscribes_tab(msg.from_user)
     await msg.reply(
@@ -1045,13 +1053,13 @@ async def generate_message_for_subscribes_tab(user: User):
         )
     return text, kb
 
-# @dp.callback_query_handler(# lambda callback: callback.data == SUBSCRIBES_CALLBACK, state="*")
+# @callback_query_handler(# lambda callback: callback.data == SUBSCRIBES_CALLBACK, state="*")
 async def get_subscribes(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     text, keyboard = await generate_message_for_subscribes_tab(callback.from_user)
     await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
 
-# @dp.callback_query_handler(# lambda callback: callback.data.startswith(CHOOSE_SUB_CAT_TO_PAUSE), state="*")
+# @callback_query_handler(# lambda callback: callback.data.startswith(CHOOSE_SUB_CAT_TO_PAUSE), state="*")
 async def get_category_to_pause_subscribe(
     callback: CallbackQuery, state: FSMContext
 ):
@@ -1079,7 +1087,7 @@ async def get_category_to_pause_subscribe(
         text_about_subscribe_pauses + "\n\nВыберите подписку: ", reply_markup=kb
     )
 
-# @dp.callback_query_handler(# lambda callback: callback.data.startswith(PAUSE_PERIOD), state="*")
+# @callback_query_handler(# lambda callback: callback.data.startswith(PAUSE_PERIOD), state="*")
 async def get_days_to_pause_period(callback: CallbackQuery, state: FSMContext):
     category = int(callback.data.split(CALLBACK_SEP)[1])
     back_button_callback = CALLBACK_SEP.join(callback.data.split(CALLBACK_SEP)[2:])
@@ -1158,7 +1166,7 @@ async def pause_period(msg: Message, state: FSMContext):
             parse_mode="HTML",
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data == TRANSFER_ACCOUNT, state="*"
 # )
 async def get_tg_id_to_transfer(callback: CallbackQuery, state: FSMContext):
@@ -1196,7 +1204,7 @@ async def get_confirmation_to_transfer(msg: Message, state: FSMContext):
     try:
         new_id = int(msg.text)
     except:
-        new_id = None
+        new_id = -1
     if new_id < 0 or not new_id:
         await msg.answer("Введенно некорректное значение")
         return
@@ -1205,7 +1213,7 @@ async def get_confirmation_to_transfer(msg: Message, state: FSMContext):
         return
     await state.finish()
     try:
-        nick = await get_nick((await callback.bot.get_chat_member(new_id, new_id)).user)
+        nick = await get_nick((await msg.bot.get_chat_member(new_id, new_id)).user)
     except:
         nick = new_id
     kb = InlineKeyboardMarkup()
@@ -1227,7 +1235,7 @@ async def get_confirmation_to_transfer(msg: Message, state: FSMContext):
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(SEND_TRANSFER_CONFIRMATION), state="*"
 # )
 async def send_validation_to_transfer(callback: CallbackQuery, state: FSMContext):
@@ -1264,7 +1272,7 @@ async def send_validation_to_transfer(callback: CallbackQuery, state: FSMContext
         'Откройте его и нажмите "Подтвердить", чтобы завершить трансфер.'
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(CONFIRM_TRANSFER_SUB), state="*"
 # )
 async def transfer_account(callback: CallbackQuery, state: FSMContext):
@@ -1358,7 +1366,7 @@ def get_kb_for_helpful_tab():
     kb.add(InlineKeyboardButton("Информация о боте", callback_data=BOT_INFO))
     return kb
 
-# # @dp.callback_query_handler(
+# # @callback_query_handler(
 #     lambda call: call.data == TAB_HELPFUL_CALLBACK, state="*"
 # )
 async def helpful_tab_callback_handler(callback: CallbackQuery, state: FSMContext):
@@ -1375,7 +1383,7 @@ async def helpful_tab_callback_handler(callback: CallbackQuery, state: FSMContex
     except MessageToEditNotFound:
         pass
 
-# @dp.callback_query_handler(lambda call: call.data.startswith(BOT_INFO), state="*")
+# @callback_query_handler(lambda call: call.data.startswith(BOT_INFO), state="*")
 async def get_bot_info(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     if callback.message.text == TEXT_ABOUT_BOT:
@@ -1394,7 +1402,7 @@ async def get_bot_info(callback: CallbackQuery, state: FSMContext):
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(GET_INFO_ABOUT_BOT_FOR_NEWBIE),
     #        # state="*",
 # )
@@ -1412,7 +1420,7 @@ async def get_info_about_bot(callback: CallbackQuery, state: FSMContext):
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(GET_LAST_MSGS_PER_DAY), state="*"
 # )
 async def get_category_to_send_last_messages(
@@ -1446,7 +1454,7 @@ async def get_category_to_send_last_messages(
         pass
     await try_to_send_latest_messages(client)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(KEYBOARD_WITH_ANSWERS), state="*"
 # )
 async def set_keybaord_with_answers_why_didnt_by(
@@ -1463,7 +1471,7 @@ async def set_keybaord_with_answers_why_didnt_by(
             ),
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(GET_ANSWER_WHY_DIDNT_BUY), state="*"
 # )
 async def get_answer_why_didnt_buy(callback: CallbackQuery, state: FSMContext):
@@ -1520,7 +1528,7 @@ async def get_answer_why_didnt_buy(callback: CallbackQuery, state: FSMContext):
     ):
         pass
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(ENROLL_IN_COURSE), state="*"
 # )
 async def enroll_client_in_course(callback: CallbackQuery, state: FSMContext):
@@ -1549,18 +1557,16 @@ async def enroll_client_in_course(callback: CallbackQuery, state: FSMContext):
         "Выберите желаемую дату консультации (/cancel для отмены):", reply_markup=kb
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
 #     simple_cal_callback.filter(), state=States.get_date_of_course
 # )
-async def get_date_of_course(callback: CallbackQuery, callback_data: dict):
+async def get_date_of_course(callback: CallbackQuery, callback_data: dict, state: FSMContext):
     selected, date = await SimpleCalendar().process_selection(
         callback, callback_data
     )
     if not selected:
         return
-    state = dp.current_state(
-        chat=callback.message.chat.id, user=callback.from_user.id
-    )
+
     await state.update_data(date=date)
     kb = InlineKeyboardMarkup()
     kb.row(
@@ -1581,7 +1587,7 @@ async def get_date_of_course(callback: CallbackQuery, callback_data: dict):
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(
 #         CHOOSE_CONSULTATION_TIME + CALLBACK_SEP
 #     ),
@@ -1623,7 +1629,7 @@ async def choose_time(callback: CallbackQuery, state: FSMContext):
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(
     #    NOTFIY_ABOUT_NEW_COURSE + CALLBACK_SEP
     # ),
@@ -1660,7 +1666,7 @@ async def notify_about_new_consultation(callback: CallbackQuery, state: FSMConte
             f"Failed to answer new consultation payment: " + str(e), exc_info=True
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(SURCHARGE), state="*"
 # )
 async def get_surcharge(callback: CallbackQuery, state: FSMContext):
@@ -1753,7 +1759,7 @@ async def get_surcharge(callback: CallbackQuery, state: FSMContext):
     except (MessageNotModified, MessageToEditNotFound):
         pass
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(EXPAND_PERIOD + CALLBACK_SEP),
     # state="*",
 # )
@@ -1812,13 +1818,15 @@ async def expand_period(callback: CallbackQuery, state: FSMContext):
         client, days_to_expand, callback.from_user
     ):
         return
+    
+    con, cur  = get_connection_and_cursor()
     if is_paying_using_ref_balance:
         ref_client.balance -= surcharge_amount
-        ref_client.add_to_db()
+        ref_client.add_to_db(con, cur)
         ReferalPaymentsHistory.save(
             ReferalPayment(date.today(), callback.from_user.id, surcharge_amount)
         )
-        statistics.save_to_statistics(
+        save_to_statistics(
             total_referal_income=surcharge_amount,
             total_referal_commisions=surcharge_amount,
             ref_link=parse_referal_link(ref_link),
@@ -1972,13 +1980,13 @@ async def stop_words_message_handler(msg: Message, state: FSMContext):
     if admin:
         await msg.answer(
             "Вы не можете использовать стоп слова, "
-            f"так как ваш аккаунт подключен к {await get_nick((await dp.callback.bot.get_chat_member(admin, admin)).user)}"
+            f"так как ваш аккаунт подключен к {await get_nick((await msg.bot.get_chat_member(admin, admin)).user)}"
         )
         return
     kb = get_kb_with_categories(for_callback=GET_CATEGORY_FOR_FILTER)
     await msg.reply("Выберите направление:", reply_markup=kb)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data == STOP_WORDS_CALLBACK, state="*"
 # )
 async def get_category_for_filter(callback: CallbackQuery, state: FSMContext):
@@ -1986,7 +1994,7 @@ async def get_category_for_filter(callback: CallbackQuery, state: FSMContext):
     kb = get_kb_with_categories(for_callback=GET_CATEGORY_FOR_FILTER)
     await callback.message.edit_text("Выберите направление:", reply_markup=kb)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(GET_CATEGORY_FOR_FILTER), state="*"
 # )
 async def stop_words(callback: CallbackQuery, state: FSMContext):
@@ -2024,7 +2032,7 @@ async def stop_words(callback: CallbackQuery, state: FSMContext):
     )
     await callback.message.edit_text(stop_words_about_text, reply_markup=kb)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(SHOW_STOP_WORDS), state="*"
 # )
 async def show_all_stop_words(callback: CallbackQuery, state: FSMContext):
@@ -2066,7 +2074,7 @@ async def show_all_stop_words(callback: CallbackQuery, state: FSMContext):
             "У вас нет фильтра. Вы можете создать его:", reply_markup=kb
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(ADD_STOP_WORDS), state="*"
 # )
 async def add_stop_words(callback: CallbackQuery, state: FSMContext):
@@ -2098,7 +2106,9 @@ async def get_new_stop_word(msg: Message, state: FSMContext):
     words = get_words_from_text(msg.text)
     StopWords.add_stop_words(client, words)
     len_words = len(words)
-    await callback.bot.send_message(
+    
+    # пиздец
+    await msg.bot.send_message(
         client.id,
         "Слов"
         + ("o" if len_words == 1 else "а")
@@ -2128,7 +2138,7 @@ def get_words_from_text(text: str) -> set:
             current_phraze.append(w.lower())
     return words
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(DELETE_STOP_WORDS), state="*"
 # )
 async def delete_stop_words(callback: CallbackQuery, state: FSMContext):
@@ -2181,9 +2191,9 @@ async def get_stop_words_to_delete(msg: Message, state: FSMContext):
             if not len(not_deleted)
             else "Слово не найдено в вашем списке"
         )
-    await callback.bot.send_message(client.id, text)
+    await msg.bot.send_message(client.id, text)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(CLEAR_STOP_WORDS), state="*"
 # )
 async def clear_stop_words(callback: CallbackQuery, state: FSMContext):
@@ -2209,7 +2219,7 @@ async def clear_stop_words(callback: CallbackQuery, state: FSMContext):
             reply_markup=kb,
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(WROTE_REVIEW), state="*"
 # )
 async def notify_about_new_review(callback: CallbackQuery, state: FSMContext):
@@ -2280,7 +2290,7 @@ async def notify_about_new_review(callback: CallbackQuery, state: FSMContext):
             exc_info=True,
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(SEND_BONUS_DAYS_FOR_REVIEW), state="*"
 # )
 async def send_sale_for_review(callback: CallbackQuery, state: FSMContext):
@@ -2309,7 +2319,7 @@ async def send_sale_for_review(callback: CallbackQuery, state: FSMContext):
     )
     await callback.message.edit_text(f"Пробные {bonus_days} дн. отправлены")
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(MARK_REVIEW_AS_FAKE), state="*"
 # )
 async def send_message_to_liar(callback: CallbackQuery, state: FSMContext):
@@ -2335,11 +2345,11 @@ async def send_message_to_liar(callback: CallbackQuery, state: FSMContext):
 # @dp.message_handler(text= POST_APPLICATION, state="*")
 async def get_category_of_application(msg: Message, state: FSMContext):
     await state.finish()
-    admin = Accounts.get_admin_of_account(msg.from_user.id)
+    admin = get_admin_of_account(msg.from_user.id)
     if admin:
         await msg.answer(
             "Вы не можете выкладывать заявки, "
-            f"так как ваш аккаунт подключен к {await get_nick((await dp.callback.bot.get_chat_member(admin, admin)).user)}"
+            f"так как ваш аккаунт подключен к {await get_nick((await msg.bot.get_chat_member(admin, admin)).user)}"
         )
         return
     str_user_id = str(msg.from_user.id)
@@ -2385,7 +2395,7 @@ async def check_if_client_sended_application_sooner(
                 return True
     return False
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data == POST_APPLICATION_CALLBACK, state="*"
 # )
 async def get_category_of_application_callback_handler(
@@ -2409,7 +2419,7 @@ async def get_category_of_application_callback_handler(
             "Выберите категорию вашей заявки:", reply_markup=kb
         )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(GET_CATEGORY_OF_POST), state="*"
 # )
 async def get_application_to_post(callback: CallbackQuery, state: FSMContext):
@@ -2465,13 +2475,13 @@ async def send_new_application_to_admin(msg: Message, state: FSMContext):
             ),
         ),
     )
-    await callback.bot.send_message(
+    await msg.bot.send_message(
         msg.from_user.id,
         "Вы уверены, что хотите разместить эту заявку?",
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(DENY_CHECK_APPLICATION), state="*"
 # )
 async def deny_send_application(callback: CallbackQuery, state: FSMContext):
@@ -2499,7 +2509,7 @@ async def deny_send_application(callback: CallbackQuery, state: FSMContext):
     )
     await callback.message.edit_text(cancel_check_text, reply_markup=kb)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(CONFIRM_CHECK_APPLICATION), state="*"
 # )
 async def check_new_application(callback: CallbackQuery, state: FSMContext):
@@ -2551,7 +2561,7 @@ async def check_new_application(callback: CallbackQuery, state: FSMContext):
     except:
         return
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(ALLOW_APPLICATION), state="*"
 # )
 async def post_application(callback: CallbackQuery, state: FSMContext):
@@ -2602,7 +2612,7 @@ async def post_application(callback: CallbackQuery, state: FSMContext):
         )
         await callback.message.edit_text(final_text)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(DECLINE_APPLICATION), state="*"
 # )
 async def ask_coment_about_application_refusal(
@@ -2659,7 +2669,7 @@ async def generate_message_to_send_comment_about_refusal(
     except (MessageNotModified, MessageCantBeEdited, MessageTextIsEmpty):
         pass
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(
     #    GET_BACK_TO_CHOOSING_COMMENT_ABOUT_REFUSAL
     # ),
@@ -2672,7 +2682,7 @@ async def gen_msg_to_send_comment_again(callback: CallbackQuery, state: FSMConte
         callback, int(to_user_id), int(to_message_id)
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda call: call.data.startswith(ATTACH_COMMENT_ABOUT_APP_REFUSAL), state="*"
 # )
 async def decline_application_from_client(
@@ -2737,13 +2747,13 @@ async def ask_to_confirm_specifical_comment_about_refusal_of_application(
             "Нет", callback_data=DECLINE_SENDING_COMMENT_ABOUT_REFUSAL
         ),
     )
-    await callback.bot.send_message(
+    await msg.bot.send_message(
         msg.from_user.id,
         "Вы уверены, что хотите отправить пользователю этот комментарий?",
         reply_markup=kb,
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data == DECLINE_SENDING_COMMENT_ABOUT_REFUSAL,
     # state=States.get_comment_about_refusal,
 # )
@@ -2755,7 +2765,7 @@ async def decline_to_send_comment_about_refusal_of_application(
     except (MessageNotModified, MessageCantBeEdited, MessageTextIsEmpty):
         pass
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data == CONFIRM_SENDING_COMMENT_ABOUT_REFUSAL,
     # state=States.get_comment_about_refusal,
 # )
@@ -2824,7 +2834,7 @@ async def report_error_handler(msg: Message, state: FSMContext):
     ]:
         await state.finish()
         try:
-            await callback.bot.send_message(msg.from_user.id, "Операция отменена")
+            await msg.bot.send_message(msg.from_user.id, "Операция отменена")
         except:
             pass
         # ай донт кноу как это решить иначе
@@ -2844,7 +2854,7 @@ async def report_error(user_id: int, type: int):
         "Опишите возникшую проблему одним сообщением (или отправьте /cancel для отмены)",
     )
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
 #    text_startswith=(REPORT_ERROR_BUTTON + CALLBACK_SEP), state="*"
 #)
 async def report_error_callback(callback: CallbackQuery, state: FSMContext):
@@ -2863,7 +2873,7 @@ async def message_handler(msg: Message, state: FSMContext):
             callback_data=REPLY_TO_USER + CALLBACK_SEP + str(msg.from_user.id),
         )
     )
-    await callback.bot.send_message(
+    await msg.bot.send_message(
         msg.from_user.id,
         "Спасибо за ваше сообщение, в ближайшее время мы вам ответим",
     )
@@ -2878,11 +2888,11 @@ async def message_handler(msg: Message, state: FSMContext):
             + f"({msg.from_user.id}) "
             + DESCIPTIONS_ABOUT_REPORT[report_type]
         )
-        await callback.bot.send_message(id, text)
-        await callback.bot.forward_message(id, msg.chat.id, msg.message_id)
-        await callback.bot.send_message(id, "_", reply_markup=kb)
+        await msg.bot.send_message(id, text)
+        await msg.bot.forward_message(id, msg.chat.id, msg.message_id)
+        await msg.bot.send_message(id, "_", reply_markup=kb)
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(REPLY_TO_USER), state="*"
 # )
 async def reply_to_users_report(callback: CallbackQuery, state: FSMContext):
@@ -2930,7 +2940,7 @@ async def get_answer(msg: Message, state: FSMContext):
             return
     await msg.answer("Ответ отправлен")
 
-# @dp.callback_query_handler(
+# @callback_query_handler(
     # lambda callback: callback.data.startswith(REPLY_TO_ADMIN), state="*"
 # )
 async def reply_to_admin(callback: CallbackQuery, state: FSMContext):

@@ -2,7 +2,7 @@ from __future__ import annotations
 from decimal import Decimal
 from src.apis.db import *
 import typing
-from src.utils.History.config import *
+from src.data.modules.history import *
 from datetime import date, datetime, timedelta
 from typing import Dict, List, Union
 
