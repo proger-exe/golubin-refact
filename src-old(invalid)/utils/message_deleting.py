@@ -2,7 +2,7 @@ from shutil import rmtree
 from typing import Tuple, Union
 import logging
 import aiogram
-from src.data.bot_data import CALLBACK_SEP, USERS_THAT_ALLOWED_TO_DELETE_MESSAGES, bot_tokens
+from src.data.bot_config import CALLBACK_SEP, USERS_THAT_ALLOWED_TO_DELETE_MESSAGES, bot_tokens
 from src.apis.db import *
 from src.data.config import *
 from aiogram import Bot, Dispatcher

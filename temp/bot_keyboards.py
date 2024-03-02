@@ -1,25 +1,26 @@
 from datetime import datetime, timedelta
-import logging, asyncio, aiogram, user
-import Votes
-from History import *
+import logging, asyncio, aiogram
+# from History import *
 from typing import Dict, Tuple, Union
 from aiogram.types import *
 from aiogram.utils.exceptions import *
-from bot_config import *
-from client import Client
+from src.apis.db.modules.votes import check_if_client_is_allowed_to_get_vote_buttons
+from src.data.bot_config import *
+from src.data.modules.refs import REFERAL_SYSTEM_BUTTON
+from src.data.modules.votes import *
+from src.markups.bot_votes_keyboards import generate_vote_keyboard, generate_vote_keyboard_for_forwarded_message
+from src.utils.client import Client
 from yoomoney import Quickpay
 from hashlib import blake2b
 from telebot.types import InlineKeyboardMarkup as OldKbType
 from telebot.types import InlineKeyboardButton as OldButtonType
-from config import *
-from Referal import RefClient, process_referal
-from Referal.config import *
+from src.data.config import *
+from Referal import RefClient
 from decimal import Decimal
-from Statistics import *
-from pb_states import States
-from Promocodes import *
-from os import listdir, mkdir, path, remove, system
-from ClientsData import *
+# from Statistics import *
+# from Promocodes import *
+from os import listdir, path
+from src.apis.ClientsData import *
 import json
 
 failed_to_delete = []  # messages that can not be deleted
@@ -32,10 +33,10 @@ main_kb.add(KeyboardButton(PERSONAL_CABINET), KeyboardButton(ADDITIONAL_OPTIONS)
 personal_cabinet_kb = ReplyKeyboardMarkup(resize_keyboard=True)
 personal_cabinet_kb.row(KeyboardButton(SUBSRIBES_BUTTON), KeyboardButton(STOP_WORDS))
 personal_cabinet_kb.row(
-    KeyboardButton(REFERAL_SYSTEM_BUTTON), KeyboardButton(Accounts.ACCOUNTS_BUTTON)
+    KeyboardButton(REFERAL_SYSTEM_BUTTON), KeyboardButton(ACCOUNTS_BUTTON)
 )
 personal_cabinet_kb.row(
-    KeyboardButton(Votes.GET_VOTE_STATISTICS),
+    KeyboardButton(GET_VOTE_STATISTICS),
     KeyboardButton(
         "📋 Гугл таблицы"
     ),  # can not import GoogleSheets (it causes a big circular import)
@@ -304,10 +305,10 @@ async def send_latest_messages(
         if TEXT_INFO in files:
             kb = (
                 None
-                if not Votes.check_if_client_is_allowed_to_get_vote_buttons(
+                if not check_if_client_is_allowed_to_get_vote_buttons(
                     client.id, client.sending_mode
                 )
-                else Votes.generate_vote_keyboard()
+                else generate_vote_keyboard()
             )
             file_path = m_dir + "/" + TEXT_INFO
             try:
@@ -326,10 +327,10 @@ async def send_latest_messages(
         elif FORWARD_INFO in files:
             kb = (
                 None
-                if not Votes.check_if_client_is_allowed_to_get_vote_buttons(
+                if not check_if_client_is_allowed_to_get_vote_buttons(
                     client.id, client.sending_mode
                 )
-                else Votes.generate_vote_keyboard_for_forwarded_message()
+                else generate_vote_keyboard_for_forwarded_message()
             )
             file_path = m_dir + "/" + FORWARD_INFO
             try:

@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import Union
-from .config import *
-from client import Client 
+
+from src.data.modules.refs import *
+from src.utils.client import Client 
 from decimal import Decimal
 from mysql.connector.connection import MySQLConnection as Connection
 from mysql.connector.cursor import MySQLCursor as Cursor
-from database import *
+from src.apis.db import *
 
 class ReferalClient():
 

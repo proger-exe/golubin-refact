@@ -1,12 +1,16 @@
 from aiogram.types import Message, CallbackQuery
 from bot_keyboards import *
+from src.apis.ClientsData import GoogleSheets, StopWords
 from src.apis.db import get_connection_and_cursor
 from src.apis.db.modules import promocodes
+from src.apis.db.modules.accounts import get_admin_of_account, transfer_accounts
 from src.apis.db.modules.payments_history import Payment, PaymentHistory
 from src.apis.db.modules.promocodes import client_used_promocode, get_id_of_promocode, get_promocode_action, get_promocode_refer, promocode_is_in_db, set_promocode_as_used_by_client
 from shutil import move
+from src.apis.db.modules.referal_payments_history import ReferalPayment, ReferalPaymentsHistory
 from src.apis.db.modules.statistics import save_to_statistics
 from src.data.bot_config import *
+from src.data.modules.history import *
 from src.data.modules.refs import *
 from yoomoney import Client as ymClient
 from aiogram.dispatcher.storage import FSMContext
@@ -158,7 +162,7 @@ def get_referal_link_of_client(client_id: int) -> str:
 # @callback_query_handler(lambda s: s.data.startswith(CHOOSE_PERIOD_PREFIX), state="*")
 async def choosing_period_handler(callback: CallbackQuery, state: FSMContext):
     await state.finish()
-    admin = Accounts.get_admin_of_account(callback.from_user.id)
+    admin = get_admin_of_account(callback.from_user.id)
     if admin:
         await callback.answer(
             "Вы не можете оплачивать подписки, "
@@ -214,7 +218,7 @@ async def select_category_to_trial(callback: CallbackQuery):
 # @callback_query_handler(# lambda callback: callback.data.startswith(ACTIVATE_TRIAL), state="*")
 async def make_trial(callback: CallbackQuery, state: FSMContext):
     await state.finish()
-    admin = Accounts.get_admin_of_account(callback.from_user.id)
+    admin = get_admin_of_account(callback.from_user.id)
     if admin:
         callback.answer
         await callback.answer(
@@ -791,7 +795,7 @@ async def withdraw_ref_balance(msg: Message, state: FSMContext):
 # @callback_query_handler(text_startswith=(USE_PROMOCODE_BUTTON), state="*")
 async def get_promocode(callback: CallbackQuery, state: FSMContext):
     await state.finish()
-    admin = Accounts.get_admin_of_account(callback.from_user.id)
+    admin = get_admin_of_account(callback.from_user.id)
     if admin:
         await callback.answer(
             "Вы не можете оплачивать подписки, "
@@ -978,6 +982,8 @@ def process_referal_for_promocode(promocode: str, user: int):
     referal = RefClient(user, HASNT_REFS, Decimal("0"), refer)
     referal.add_to_db(con, cur)
     refer = RefClient.get_client_by_id(refer)
+    if not refer:
+        return 
     refer.referal_status = HAS_REFS
     refer.add_to_db(con, cur)
 
@@ -1175,7 +1181,7 @@ async def get_tg_id_to_transfer(callback: CallbackQuery, state: FSMContext):
     kb.add(
         InlineKeyboardButton(BACK_BUTTON_TEXT, callback_data=SUBSCRIBES_CALLBACK)
     )
-    admin = Accounts.get_admin_of_account(callback.from_user.id)
+    admin = get_admin_of_account(callback.from_user.id)
     if admin:
         try:
             nick = await get_nick(await callback.bot.get_chat_member(admin, admin))
@@ -1310,7 +1316,7 @@ async def transfer_account(callback: CallbackQuery, state: FSMContext):
     except:
         logging.fatal(f"FAILED TO TRANSFER CLIENT:", exc_info=True)
     try:
-        Accounts.transfer_accounts(old_id, new_id)
+        transfer_accounts(old_id, new_id)
     except:
         logging.fatal(f"FAILED TO TRANSFER ACCOUNTS:", exc_info=True)
     try:
@@ -1427,7 +1433,7 @@ async def get_category_to_send_last_messages(
     callback: CallbackQuery, state: FSMContext
 ):
     await state.finish()
-    admin = Accounts.get_admin_of_account(callback.from_user.id)
+    admin = get_admin_of_account(callback.from_user.id)
     if admin:
         await callback.answer(
             "Вы не можете выполнить это действие, "
@@ -1803,7 +1809,7 @@ async def expand_period(callback: CallbackQuery, state: FSMContext):
             surcharge_amount = Decimal(str(history.operations[0].amount))
     category = int(category)
     client = await try_to_find_client_to_expand_period(
-        callback.from_user, category, days_to_expand
+        callback.from_user, category, days_to_expand, callback.bot
     )
     if not client:
         try:
@@ -1815,7 +1821,7 @@ async def expand_period(callback: CallbackQuery, state: FSMContext):
             pass
         return
     if not await try_to_expand_client_period(
-        client, days_to_expand, callback.from_user
+        client, days_to_expand, callback.from_user, callback.bot
     ):
         return
     
@@ -1878,7 +1884,7 @@ async def expand_period(callback: CallbackQuery, state: FSMContext):
         logging.error(f"Failed to save payment:", exc_info=True)
 
 async def try_to_find_client_to_expand_period(
-    user: User, mode: int, days_to_expand: int
+    user: User, mode: int, days_to_expand: int, bot
 ) -> Client:
     try:
         client = Client.get_clients_by_filter(id=user.id, category=mode)[0]
@@ -1888,13 +1894,13 @@ async def try_to_find_client_to_expand_period(
             + str(e),
             exc_info=True,
         )
-        await callback.bot.send_message(
+        await bot.send_message(
             DEVELOPER_ID, f"Failed to find {await get_nick(user)} after surcharging"
         )
     return client
 
 async def try_to_expand_client_period(
-    client: Client, days_to_expand: int, user: User
+    client: Client, days_to_expand: int, user: User, bot
 ) -> bool:
     try:
         client.increase_period(days_to_expand)
@@ -1904,7 +1910,7 @@ async def try_to_expand_client_period(
             + str(e),
             exc_info=True,
         )
-        await callback.bot.send_message(
+        await bot.send_message(
             DEVELOPER_ID,
             f"Failed to expand {await get_nick(user)}`s period by {days_to_expand} days",
         )
@@ -1976,7 +1982,7 @@ def save_payment_after_expanding_period(
 # @dp.message_handler(text= STOP_WORDS, state="*")
 async def stop_words_message_handler(msg: Message, state: FSMContext):
     await state.finish()
-    admin = Accounts.get_admin_of_account(msg.from_user.id)
+    admin = get_admin_of_account(msg.from_user.id)
     if admin:
         await msg.answer(
             "Вы не можете использовать стоп слова, "
@@ -2842,14 +2848,14 @@ async def report_error_handler(msg: Message, state: FSMContext):
 
     await state.finish()
     await report_error(
-        msg.from_user.id, 0
+        msg.from_user.id, 0,
+        state, msg.bot
     )  # 0 is index in list with replies to reports
 
-async def report_error(user_id: int, type: int):
+async def report_error(user_id: int, type: int, state, bot):
     await States.get_report.set()
-    state = dp.current_state(chat=user_id, user=user_id)
     await state.update_data(report_type=type)
-    await callback.bot.send_message(
+    await bot.send_message(
         user_id,
         "Опишите возникшую проблему одним сообщением (или отправьте /cancel для отмены)",
     )
@@ -2860,7 +2866,7 @@ async def report_error(user_id: int, type: int):
 async def report_error_callback(callback: CallbackQuery, state: FSMContext):
     await state.finish()
     report_type = int(callback.data.split(CALLBACK_SEP)[1])
-    await report_error(callback.from_user.id, report_type)
+    await report_error(callback.from_user.id, report_type, state, callback.bot)
 
 # @dp.message_handler(state=States.get_report)
 async def message_handler(msg: Message, state: FSMContext):
