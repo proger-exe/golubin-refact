@@ -7,7 +7,7 @@ from src.data.config import *
 from aiogram import Bot, Dispatcher
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.exceptions import *
-from src.data.bot_config import USERS_THAT_ALLOWED_TO_DELETE_MESSAGES, CALLBACK_SEP
+from src.data.bot_config import USERS_THAT_ALLOWED_TO_DELETE_MESSAGES, CALLBACK_SEP, bot_tokens
 from telebot.types import InlineKeyboardMarkup as OldKbMarkup
 
 DELETE_MESSAGE = "DELETE_MSG"
@@ -287,11 +287,17 @@ async def delete_message_from_inside_bot(
         delete_sended_message_from_temp(bot_id, relative_message_id)
 
 
-def init_callbacks(
-    dp: Dispatcher, bot_id: int
-):  # bot_id can be either PAYING_BOT_ID or SENDER_BOT_ID (+category id)
-    bot = dp.bot
+async def del_spam_message(relative_msg_id: int, category: int, not_delete: typing.Tuple[int, int])\
+-> typing.Tuple[int, int, int]:
+    b = Bot(bot_tokens[category])
+    try:
+        data = get_sended_message_data(relative_msg_id, SENDER_BOT_ID + category)
+        succesfully, unsuccesfully, total = await delete_sended_msg(b, data, not_delete)
+        await (await b.get_session()).close()
+        del data
+    except:
+        logging.critical(f'Failed to delete spam message by relative message id:', exc_info = True)
+        return (0, 0, 0)
 
-    @dp.callback_query_handler(lambda c: c.data.startswith(DELETE_MESSAGE))
-    async def message_deleting_query_handler(call: CallbackQuery):
-        await del_sended_message_by_callback_query(call, bot, bot_id)
+    delete_saved_message_data(relative_msg_id, SENDER_BOT_ID + category)
+    return succesfully, unsuccesfully, total

@@ -25,7 +25,7 @@ from Promocodes import *
 from threading import Thread
 from bot_keyboards import try_to_send_latest_messages, main_kb
 import message_deleting
-import user
+from src.apis.db import user 
 from .google_sheets import *
 from ClientsData.StopWords import edit_bot_filter
 from .timed_sendings import *

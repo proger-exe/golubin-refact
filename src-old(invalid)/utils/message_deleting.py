@@ -221,3 +221,4 @@ async def del_spam_message(relative_msg_id: int, category: int, not_delete: typi
 
     delete_saved_message_data(relative_msg_id, SENDER_BOT_ID + category)
     return succesfully, unsuccesfully, total
+

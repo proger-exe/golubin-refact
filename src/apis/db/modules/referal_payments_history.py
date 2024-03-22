@@ -1,5 +1,5 @@
 import typing
-from src.utils.History.config import *
+from src.data.modules.history import *
 from src.apis.db import *
 from datetime import date
 from decimal import Decimal

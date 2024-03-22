@@ -3,7 +3,7 @@ from typing import Union
 from datetime import date
 import typing
 from mysql.connector.cursor import MySQLCursor
-from src.utils.Votes.config import *
+from src.data.modules.votes import *
 from src.apis.db import *
 
 class Vote:

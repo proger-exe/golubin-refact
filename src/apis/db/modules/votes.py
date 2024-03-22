@@ -2,12 +2,12 @@ from datetime import date
 import typing
 
 from aiogram import Bot
-from src.apis.bot_get_nick import get_nick
-from db.accounts import get_admin_of_account, get_all_accounts_of
-from db.user import client_has_year_subscribe
-from src.data.bot_data import EUGENIY_ID
+from src.utils.bot_get_nick import get_nick
+from src.apis.db.modules.accounts import get_admin_of_account, get_all_accounts_of
+from src.apis.db.modules.user import client_has_year_subscribe
+from src.data.bot_config import EUGENIY_ID
 from src.data.config import message_categories, message_category_names
-from src.utils.Votes.config import TARGET, NOT_TARGET, SPAM
+from src.data.modules.votes import TARGET, NOT_TARGET, SPAM
 from .users_votes import Vote
 
 

@@ -1,5 +1,5 @@
 from typing import Union
-from src.handlers.need_rewrite.Referal.config import *
+from src.data.modules.refs import *
 from src.apis.db import *
 
 def add_new_referal_link(name: str, url: str):
